@@ -3,8 +3,12 @@ const Employee = require("../models/Employee");
 
 const auth = async (req, res, next) => {
   try {
-    // Get token from header
+
     const authHeader = req.header("Authorization");
+
+    console.log("AUTH HEADER:", authHeader);
+    console.log("JWT SECRET EXISTS:", !!process.env.JWT_SECRET);
+
 
     if (!authHeader) {
       return res.status(401).json({
@@ -12,25 +16,26 @@ const auth = async (req, res, next) => {
       });
     }
 
-    const token = authHeader.replace("Bearer ", "");
 
-    if (!token) {
-      return res.status(401).json({
-        message: "No token, authorization denied",
-      });
-    }
+    const token = authHeader.split(" ")[1];
+
+    console.log("TOKEN:", token);
 
 
-    // Verify token
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
     );
 
 
-    // Find employee
+    console.log("DECODED:", decoded);
+
+
     const employee = await Employee.findById(decoded.id)
       .select("-password");
+
+
+    console.log("EMPLOYEE:", employee);
 
 
     if (!employee) {
@@ -40,42 +45,36 @@ const auth = async (req, res, next) => {
     }
 
 
-    // Add employee to request
     req.employee = employee;
 
     next();
 
 
-  } catch (error) {
+  } catch(error){
 
-    console.log("JWT Error:", error.message);
+    console.log("JWT ERROR:", error.message);
 
     return res.status(401).json({
-      message: "Token is not valid",
-      error: error.message,
+      message: error.message
     });
 
   }
 };
 
 
+const isAdmin = (req,res,next)=>{
 
-const isAdmin = (req, res, next) => {
-
-  if (req.employee.role !== "admin") {
-
+  if(req.employee.role !== "admin"){
     return res.status(403).json({
-      message: "Access denied. Admin only.",
+      message:"Admin only"
     });
-
   }
 
   next();
 };
 
 
-
 module.exports = {
   auth,
-  isAdmin,
+  isAdmin
 };
