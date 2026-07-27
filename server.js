@@ -1,4 +1,12 @@
+const mongoose = require('mongoose');
 require("dotenv").config();
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("MongoDB Connected ✅"))
+.catch(err => console.log("MongoDB Connection Error ❌:", err))
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/database");
@@ -11,7 +19,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 
 const app = express();
-console.log("MONGODB_URI =", process.env.MONGODB_URI);
+
 connectDB();
 
 app.use(cors());
