@@ -13,11 +13,19 @@ const feedbackRoutes = require("./routes/feedbackRoutes");
 
 const app = express();
 
-connectDB();
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://your-vercel-link.vercel.app"
+    ],
+    credentials: true,
+  })
+);
 
-app.use(cors());
 app.use(express.json());
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendanceRoutes);
@@ -31,6 +39,13 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Database connect then start server
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT} ✅`);
+    });
+  })
+  .catch((error) => {
+    console.log("Server Error ❌:", error.message);
+  });
