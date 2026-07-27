@@ -47,5 +47,5 @@ connectDB()
     });
   })
   .catch((error) => {
-    console.log("Server Error ❌:", error.message);
+    console.log(error);
   });
