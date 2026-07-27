@@ -8,16 +8,11 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, role, department, position, phone } = req.body;
 
-    console.log("Checking existing employee...");
-
     const existingEmployee = await Employee.findOne({ email });
 
     if (existingEmployee) {
-      console.log("Employee already exists");
       return res.status(400).json({ message: "Employee already exists" });
     }
-
-    console.log("Creating new employee...");
 
     const employee = new Employee({
       name,
@@ -31,8 +26,6 @@ exports.register = async (req, res) => {
 
     await employee.save();
 
-    console.log("Employee saved successfully");
-
     const token = jwt.sign(
       { id: employee._id },
       process.env.JWT_SECRET,
@@ -43,12 +36,14 @@ exports.register = async (req, res) => {
       message: "Employee registered successfully",
       token,
       employee: {
+        _id: employee._id,
         id: employee._id,
         name: employee.name,
         email: employee.email,
         role: employee.role,
         department: employee.department,
-        position: employee.position
+        position: employee.position,
+        phone: employee.phone
       }
     });
 
@@ -57,6 +52,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 exports.login = async (req, res) => {
   try {
@@ -84,20 +80,23 @@ exports.login = async (req, res) => {
       message: "Login successful",
       token,
       employee: {
+        _id: employee._id,
         id: employee._id,
         name: employee.name,
         email: employee.email,
         role: employee.role,
         department: employee.department,
-        position: employee.position
+        position: employee.position,
+        phone: employee.phone
       }
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Login Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 exports.getProfile = async (req, res) => {
   try {
